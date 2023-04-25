@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 
 import axios from 'axios';
 import { TableContainer, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
-import { Paper, Divider, Pagination, Box } from '@mui/material/';
+import { Avatar, Paper, Divider, Pagination, Box } from '@mui/material/';
+import { Link } from 'react-router-dom';
 
 const baseURL = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=200'
 
@@ -17,7 +18,6 @@ function Home() {
             try {
                 const response = await axios.get(baseURL);
                 setData(response.data)
-                console.log(response.data)
             } catch (error) {
                 console.error(error)
             }
@@ -34,6 +34,18 @@ function Home() {
 
     const handleChange = (e, value) => {
         setPage(value);
+    }
+
+    const getId = (e) => {
+        console.log(e.currentTarget.id)
+    }
+
+    const percentNull = (value) => {
+        if (value === null) {
+            return 0;
+        } else {
+            return Math.round((value + Number.EPSILON) * 100) / 100;
+        }
     }
 
   return (
@@ -56,14 +68,18 @@ function Home() {
                 <TableBody>
                     {currentData.map(dataItem => {
                         return (
-                                <TableRow>
-                                    <TableCell component="th">{dataItem.name}</TableCell>
-                                    <TableCell align="left" className='coin-logo'><img src={dataItem.image} alt="crypto-coin-logo"/></TableCell>
+                                <TableRow key={dataItem.id}>
+                                    <TableCell component="th">
+                                        <Link to={`/coin/${dataItem.id}`}>
+                                            {dataItem.name}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell align="left" className='coin-logo'><Avatar src={dataItem.image} alt="crypto-coin-logo"/></TableCell>
                                     <TableCell align="left">{dataItem.symbol.toUpperCase()}</TableCell>
-                                    <TableCell align="left">{dataItem.current_price}</TableCell>
-                                    <TableCell align="left">{dataItem.market_cap}</TableCell>
-                                    <TableCell align="left">{dataItem.price_change_percentage_24h}</TableCell>
-                                    <TableCell align="left">{dataItem.total_volume}</TableCell>
+                                    <TableCell align="left">${dataItem.current_price.toLocaleString()}</TableCell>
+                                    <TableCell align="left">${dataItem.market_cap.toLocaleString()}</TableCell>
+                                    <TableCell align="left">{percentNull(dataItem.price_change_percentage_24h)}%</TableCell>
+                                    <TableCell align="left">$ {dataItem.total_volume.toLocaleString()}</TableCell>
                                 </TableRow>
                         )})}
                 </TableBody>
